@@ -111,12 +111,10 @@ def scrape_appstore_contact_info(soup):
 
     return contact_info # returns dictionary
 
-print(scrape_appstore_information(soup, "Compatibility"))
-
 product_name = scrape_appstore_name(soup)
 product_description = scrape_appstore_description(soup)
-print(product_name)
-print(product_description)
+print("Product name: " + product_name)
+print("Product description: " + product_description + "\n\n")
 
 def generate_feature_list(name, description):
     '''
@@ -126,20 +124,47 @@ def generate_feature_list(name, description):
     # Initialize the OpenAI API
     openai.api_key = openai_api_key
 
+    example_list = [
+            "User Profile",
+            "News Feed",
+            "Friend System",
+            "Status Updates",
+            "Likes and Reactions",
+            "Comments",
+            "Messenger",
+            "Notifications",
+            "Events",
+            "Groups",
+            "Pages",
+            "Marketplace",
+            "Gaming",
+            "Privacy Settings",
+            "Search",
+            "Live Video",
+            "Photo and Video Sharing",
+            "Profile Customization",
+            "Marketplace",
+            "Advertising",
+            "Fundraisers",
+            "Check-Ins"
+        ]
+
     # Define the customised prompt for generalised feature extraction
     prompt = (f"Analyse the product '{name}' with the following description and generate a "
               f"generalised list of potential features that clients might want to build. "
               f"The list should be broad and abstract, suitable for clients to understand the key functionalities "
               f"they might consider for similar applications.\n\n"
               f"Description: '{description}'\n\n"
-              f"Generalised Features as Python List:")
+              f"This is an example list: {example_list} \n\n"
+              f"What are the features (ex: login, social media feed, friend system,etc.) basing off the product name and description. Your output is strictly only the python list of string (no explain).")
 
     # Use ChatCompletion or an equivalent method to generate the response
     try:
         response = ChatCompletion.create(
             model="gpt-3.5-turbo",  # Replace with your preferred model version
             messages=[{"role": "system", "content": "Extract a feature list from a product description."},
-                      {"role": "user", "content": prompt}]
+                      {"role": "user", "content": prompt}],
+                      temperature=0.0
         )
 
         # Extracting the feature list from the response
@@ -152,4 +177,5 @@ def generate_feature_list(name, description):
 
 # Example usage
 feature_list = generate_feature_list(product_name, product_description)
+print("Feature List: \n")
 print(feature_list)
