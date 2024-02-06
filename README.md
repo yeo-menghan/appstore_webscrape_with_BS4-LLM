@@ -1,4 +1,4 @@
-# App Store Web Scraper with LLM for feature extraction
+# App Store Web Scraper with BS4 and LLM for feature extraction
 
 ## Description
 This project consists of a Python-based web scraper designed to extract information from App Store listings. It fetches details such as app name, description, and features, and is ideal for those looking to gather data about apps listed on the App Store.
