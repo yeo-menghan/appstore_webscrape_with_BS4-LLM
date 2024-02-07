@@ -1,3 +1,5 @@
+## TODO: create a similarity search between the description and company's feature list
+
 # Web scrapping
 from bs4 import BeautifulSoup
 import requests
@@ -18,7 +20,8 @@ if not openai_api_key:
     raise ValueError("OpenAI API key not found. Please set it in the .env file.")
 
 # Replace 'your_url_here' with the actual URL you want to scrape
-url = 'https://apps.apple.com/us/app/friendly-social-browser/id400169658'
+# url = 'https://apps.apple.com/us/app/facebook/id284882215'
+url = 'https://apps.apple.com/us/app/mobile-legends-bang-bang/id1160056295'
 response = requests.get(url)
 html = response.content
 
@@ -30,8 +33,14 @@ def scrape_appstore_name(soup):
     '''
     app_name = soup.find("h1", class_="product-header__title app-header__title")
     if app_name:
-        app_name = app_name.get_text(separator='', strip=True).split()[0]
-        output = ''.join(filter(str.isalpha, app_name))
+        # Get text with no separator to ensure contiguous string, then strip leading/trailing spaces
+        app_name_text = app_name.get_text(separator=' ', strip=True)
+        # Split by spaces to work with individual words
+        words = app_name_text.split()
+        # Retain words that are purely alphabetic, discarding age tags or other numeric/alphanumeric parts
+        filtered_words = [word for word in words if word.isalpha()]
+        # Join the filtered words back into a string
+        output = ' '.join(filtered_words)
     else:
         print("no title found")
         output = ""
@@ -149,14 +158,21 @@ def generate_feature_list(name, description):
             "Check-Ins"
         ]
 
-    # Define the customised prompt for generalised feature extraction
-    prompt = (f"Analyse the product '{name}' with the following description and generate a "
-              f"generalised list of potential features that clients might want to build. "
-              f"The list should be broad and abstract, suitable for clients to understand the key functionalities "
-              f"they might consider for similar applications.\n\n"
-              f"Description: '{description}'\n\n"
-              f"This is an example list: {example_list} \n\n"
-              f"What are the features (ex: login, social media feed, friend system,etc.) basing off the product name and description. Your output is strictly only the python list of string (no explain).")
+    # Define the product name and its description
+    name = "Social Networking Platform"
+    description = ("A comprehensive social media platform allowing users to connect with friends and family, "
+                "share updates, photos, and videos, join communities of interest, and discover content. "
+                "Enables businesses to create pages, advertise products, and engage with their audience. "
+                "Features include real-time messaging, event planning, marketplace for buying and selling goods, "
+                "gaming, live streaming, and privacy controls to manage visibility and interactions.")
+
+    # Formulate the few-shot prompt
+    prompt = (f"Given the description of '{name}', a '{description}', generate a list of potential features. "
+            f"Here are some examples of features for similar platforms: \n"
+            f"{example_list} \n"
+            f"Based on the {product_name} and {product_description}, what are other features that might be considered? "
+            f"Make sure these features are within the contact of website and application development."
+            f"List them in a similar, concise manner. Output should be a Python list of strings, each representing a feature.")
 
     # Use ChatCompletion or an equivalent method to generate the response
     try:
